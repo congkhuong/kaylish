@@ -120,7 +120,7 @@ const KAYLISH_GDRIVE = {
         },
       });
 
-      client.requestAccessToken({ prompt: 'consent' });
+      client.requestAccessToken({ prompt: 'select_account' });
     });
   },
 
