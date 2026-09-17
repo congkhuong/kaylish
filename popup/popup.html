@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kaylish - English Listening Todo</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="logo">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+            <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
+          </svg>
+        </div>
+        <div>
+          <h1 class="app-title">Kaylish</h1>
+          <p class="app-subtitle">Listening Todo List</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="btn-gdrive-sync" class="sync-btn" title="Đồng bộ Google Drive">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+          </svg>
+          <span id="sync-status-label">Drive Sync</span>
+        </button>
+        <button id="btn-settings" class="icon-btn" title="Cài đặt Google Client ID">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+        <button id="btn-export" class="icon-btn" title="Xuất dữ liệu JSON">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+        </button>
+        <button id="btn-import" class="icon-btn" title="Nhập dữ liệu JSON">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+        </button>
+        <input type="file" id="file-import" accept=".json" style="display: none;">
+      </div>
+    </header>
+
+    <!-- Controls Toolbar -->
+    <div class="controls-bar">
+      <!-- Voice Selector -->
+      <div class="control-group">
+        <label for="select-voice">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+          </svg>
+        </label>
+        <select id="select-voice" class="custom-select">
+          <option value="">Đang tải giọng đọc...</option>
+        </select>
+      </div>
+
+      <!-- Playback Speed -->
+      <div class="control-group">
+        <span class="control-label">Tốc độ:</span>
+        <div class="speed-selector">
+          <button class="speed-btn" data-speed="0.75">0.75x</button>
+          <button class="speed-btn active" data-speed="1.0">1.0x</button>
+          <button class="speed-btn" data-speed="1.25">1.25x</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mode Options -->
+    <div class="options-bar">
+      <label class="toggle-blur-container" title="Ẩn chữ để thử thách khả năng nghe">
+        <input type="checkbox" id="toggle-blur" checked>
+        <span class="toggle-slider"></span>
+        <span class="toggle-text">Che chữ khi luyện nghe</span>
+      </label>
+      <div class="search-box">
+        <input type="text" id="input-search" placeholder="Tìm kiếm câu...">
+      </div>
+    </div>
+
+    <!-- Quick Add Form -->
+    <form id="form-add" class="add-form">
+      <input type="text" id="input-text" placeholder="Nhập câu tiếng Anh mới..." required autocomplete="off">
+      <button type="submit" class="btn-add" title="Thêm câu">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+      </button>
+    </form>
+
+    <!-- Tabs Header -->
+    <nav class="tabs-nav">
+      <button class="tab-btn active" data-tab="active">
+        Cần nghe <span id="badge-active" class="tab-badge">0</span>
+      </button>
+      <button class="tab-btn" data-tab="archived">
+        Đã thuộc <span id="badge-archived" class="tab-badge secondary">0</span>
+      </button>
+    </nav>
+
+    <!-- Items List Container -->
+    <main class="items-container">
+      <div id="items-list" class="items-list">
+        <!-- Rendered items will appear here -->
+      </div>
+      
+      <!-- Empty State -->
+      <div id="empty-state" class="empty-state" style="display: none;">
+        <div class="empty-icon">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M8 15h8"></path>
+            <line x1="9" y1="9" x2="9.01" y2="9"></line>
+            <line x1="15" y1="9" x2="15.01" y2="9"></line>
+          </svg>
+        </div>
+        <p class="empty-title">Chưa có câu nào trong danh sách</p>
+        <p class="empty-desc">Bôi đen văn bản trên trang web bất kỳ -> Click chuột phải chọn "Thêm vào Kaylish" hoặc nhập ở trên.</p>
+      </div>
+    </main>
+
+    <!-- Footer Status -->
+    <footer class="app-footer">
+      <span id="status-text">Đã đồng bộ Google Account</span>
+      <button id="btn-clear-all" class="btn-text-danger">Xóa tất cả</button>
+    </footer>
+  </div>
+
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="../gdrive.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

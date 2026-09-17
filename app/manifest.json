@@ -1,0 +1,21 @@
+{
+  "short_name": "Kaylish",
+  "name": "Kaylish - English Listening Todo",
+  "icons": [
+    {
+      "src": "../icons/icon48.png",
+      "type": "image/png",
+      "sizes": "48x48"
+    },
+    {
+      "src": "../icons/icon128.png",
+      "type": "image/png",
+      "sizes": "128x128"
+    }
+  ],
+  "start_url": "./index.html",
+  "background_color": "#0B0F19",
+  "theme_color": "#6366F1",
+  "display": "standalone",
+  "orientation": "portrait"
+}

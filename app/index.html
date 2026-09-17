@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Kaylish - Mobile Listening Todo</title>
+  <meta name="theme-color" content="#0B0F19">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="../icons/icon128.png">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <div class="mobile-app">
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="logo">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+            <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
+          </svg>
+        </div>
+        <div>
+          <h1 class="app-title">Kaylish Mobile</h1>
+          <p class="app-subtitle">Audio Listening Todo</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Google Drive Sync Button -->
+        <button id="btn-gdrive-sync" class="sync-btn" title="Đồng bộ Google Drive">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+          </svg>
+          <span id="sync-status-label">Drive Sync</span>
+        </button>
+
+        <button id="btn-settings" class="icon-btn" title="Cài đặt">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Sync Notice Banner -->
+    <div id="sync-banner" class="sync-banner" style="display: none;">
+      <span id="sync-banner-text">Đã đồng bộ với Google Drive</span>
+      <button id="btn-close-banner">✕</button>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="stats-bar">
+      <div class="stat-card">
+        <span class="stat-num" id="stat-active">0</span>
+        <span class="stat-lbl">Cần luyện nghe</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num" id="stat-listened">0</span>
+        <span class="stat-lbl">Lượt đã nghe</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num" id="stat-archived">0</span>
+        <span class="stat-lbl">Đã thuộc</span>
+      </div>
+    </div>
+
+    <!-- Controls Toolbar -->
+    <div class="controls-card">
+      <div class="control-row">
+        <span class="control-title">🔊 Giọng đọc:</span>
+        <select id="select-voice" class="custom-select">
+          <option value="">Tự động chọn giọng chuẩn</option>
+        </select>
+      </div>
+
+      <div class="control-row">
+        <span class="control-title">⚡ Tốc độ:</span>
+        <div class="speed-selector">
+          <button class="speed-btn" data-speed="0.75">0.75x</button>
+          <button class="speed-btn active" data-speed="1.0">1.0x</button>
+          <button class="speed-btn" data-speed="1.25">1.25x</button>
+        </div>
+      </div>
+
+      <div class="control-row space-between">
+        <label class="toggle-blur-container">
+          <input type="checkbox" id="toggle-blur" checked>
+          <span class="toggle-slider"></span>
+          <span class="toggle-text">Che chữ để thử thách khả năng nghe</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Quick Add Form -->
+    <form id="form-add" class="add-form">
+      <input type="text" id="input-text" placeholder="Thêm câu tiếng Anh mới..." required autocomplete="off">
+      <button type="submit" class="btn-add">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+      </button>
+    </form>
+
+    <!-- Tabs Navigation -->
+    <nav class="tabs-nav">
+      <button class="tab-btn active" data-tab="active">
+        Cần nghe (<span id="badge-active">0</span>)
+      </button>
+      <button class="tab-btn" data-tab="archived">
+        Đã thuộc (<span id="badge-archived">0</span>)
+      </button>
+    </nav>
+
+    <!-- Main List Container -->
+    <main class="items-container">
+      <div id="items-list" class="items-list"></div>
+
+      <!-- Empty State -->
+      <div id="empty-state" class="empty-state" style="display: none;">
+        <div class="empty-icon">🎧</div>
+        <p class="empty-title">Chưa có câu tiếng Anh nào</p>
+        <p class="empty-desc">Thêm câu mới ở trên hoặc bấm <strong>"Drive Sync"</strong> để tải dữ liệu đã bôi đen từ máy tính xuống.</p>
+      </div>
+    </main>
+
+    <!-- Settings & Google Drive Modal -->
+    <div id="modal-settings" class="modal-overlay" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2>Cài đặt & Google Drive Sync</h2>
+          <button id="btn-close-modal" class="btn-icon">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="setting-section">
+            <h3>☁️ Đồng bộ Google Drive (Client ID)</h3>
+            <p class="setting-desc">Nhập Google Client ID của bạn (chỉ nhập 1 lần duy nhất) để hiện cửa sổ đăng nhập 1-Click của Google.</p>
+            
+            <div class="form-group">
+              <label>Google OAuth Client ID:</label>
+              <input type="text" id="input-gdrive-clientid" placeholder="xxxxxxxx.apps.googleusercontent.com">
+              <button id="btn-save-gdrive-clientid" class="btn-primary-sm">Đăng nhập với Google</button>
+            </div>
+
+            <div class="divider">HOẶC DÁN TOKEN THỦ CÔNG</div>
+
+            <div class="form-group">
+              <label>Google OAuth Access Token:</label>
+              <input type="text" id="input-gdrive-token" placeholder="Dán Bearer Token (Nếu dùng Playground)...">
+              <button id="btn-save-gdrive-token" class="btn-primary-sm">Lưu Token</button>
+            </div>
+
+            <div class="divider">HOẶC NHẬP / XUẤT FILE FILE TỰ TAY</div>
+
+            <div class="action-buttons">
+              <button id="btn-export-json" class="btn-secondary">
+                📥 Xuất File Backup JSON
+              </button>
+              <button id="btn-import-json" class="btn-secondary">
+                📤 Nhập File JSON từ PC
+              </button>
+              <input type="file" id="file-import" accept=".json" style="display: none;">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="../gdrive.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cài đặt Kaylish & Google Drive Sync</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="settings-container">
+    <!-- Header -->
+    <header class="settings-header">
+      <div class="brand">
+        <div class="logo">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+            <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
+          </svg>
+        </div>
+        <div>
+          <h1>Cài Đặt Kaylish</h1>
+          <p>Quản lý cấu hình kết nối Google Drive & Đồng bộ dữ liệu</p>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Grid -->
+    <main class="settings-grid">
+      
+      <!-- Card 1: Google OAuth 2.0 Credentials -->
+      <section class="card">
+        <div class="card-header">
+          <h2>☁️ 1. Cấu hình Google OAuth 2.0 Client ID</h2>
+          <span class="badge badge-info">Khuyên dùng</span>
+        </div>
+        <p class="card-desc">Nhập Google Client ID của bạn để kích hoạt đăng nhập 1-Click tự động gia hạn token ngầm.</p>
+
+        <div class="form-group">
+          <label for="input-client-id">Google Client ID:</label>
+          <input type="text" id="input-client-id" placeholder="Dạng: xxxxxxxxxxxx.apps.googleusercontent.com" autocomplete="off">
+        </div>
+
+        <div class="form-group">
+          <label>Authorized Redirect URI cho Google Cloud Console:</label>
+          <div class="copy-box">
+            <input type="text" id="input-redirect-uri" readonly>
+            <button id="btn-copy-uri" class="btn-copy" title="Copy Redirect URI">📋 Copy</button>
+          </div>
+          <p class="field-hint">💡 Hãy dán URI này vào mục <strong>Authorized redirect URIs</strong> trên trang Google Cloud Console của bạn.</p>
+        </div>
+
+        <div class="card-actions">
+          <button id="btn-google-login" class="btn-primary">
+            🔑 Đăng nhập với Google & Kích hoạt Sync
+          </button>
+        </div>
+      </section>
+
+      <!-- Card 2: Manual Access Token -->
+      <section class="card">
+        <div class="card-header">
+          <h2>🔑 2. Nhập Token Thủ Công (OAuth Playground)</h2>
+        </div>
+        <p class="card-desc">Nếu không muốn dùng Client ID, bạn có thể dán trực tiếp Access Token từ Google OAuth Playground tại đây.</p>
+
+        <div class="form-group">
+          <label for="input-access-token">Google Access Token:</label>
+          <input type="text" id="input-access-token" placeholder="Dán chuỗi ya29.a0... tại đây">
+        </div>
+
+        <div class="card-actions">
+          <button id="btn-save-token" class="btn-secondary">
+            💾 Lưu Token & Thử Đồng Bộ Ngay
+          </button>
+        </div>
+      </section>
+
+      <!-- Card 3: Sync Status & Trigger -->
+      <section class="card">
+        <div class="card-header">
+          <h2>🔄 3. Trạng thái Đồng bộ Google Drive</h2>
+        </div>
+
+        <div class="status-box">
+          <div class="status-row">
+            <span class="status-label">Trạng thái kết nối:</span>
+            <span id="status-badge" class="badge badge-warning">Chưa kết nối</span>
+          </div>
+          <div class="status-row">
+            <span class="status-label">Lần đồng bộ cuối:</span>
+            <span id="status-last-sync" class="status-value">Chưa từng sync</span>
+          </div>
+          <div class="status-row">
+            <span class="status-label">Số câu hiện tại:</span>
+            <span id="status-item-count" class="status-value">0 câu</span>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button id="btn-sync-now" class="btn-primary">
+            🚀 Đồng bộ ngay lên Google Drive (Sync Now)
+          </button>
+          <button id="btn-disconnect" class="btn-danger-outline">
+            🚪 Đăng xuất / Xóa kết nối
+          </button>
+        </div>
+      </section>
+
+      <!-- Card 4: Backup & Data Tools -->
+      <section class="card">
+        <div class="card-header">
+          <h2>📦 4. Quản lý File JSON & Dữ liệu Cục bộ</h2>
+        </div>
+        <p class="card-desc">Sao lưu tệp JSON hoặc khôi phục dữ liệu học tập thủ công.</p>
+
+        <div class="card-actions space-around">
+          <button id="btn-export-json" class="btn-secondary">
+            📥 Xuất File Backup JSON
+          </button>
+          <button id="btn-import-json" class="btn-secondary">
+            📤 Nhập File JSON từ máy tính
+          </button>
+          <input type="file" id="file-import" accept=".json" style="display: none;">
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="../gdrive.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>
