@@ -113,36 +113,32 @@ document.addEventListener("DOMContentLoaded", () => {
     loadSettings();
   });
 
-  // Core Sync Function
+  // Core Sync Function for 2 separate files
   async function triggerSync(token) {
     try {
       const data = await new Promise(r => chrome.storage.sync.get({ kaylishItems: [] }, r));
       let kaylishItems = data.kaylishItems || [];
 
-      const remoteItems = await KAYLISH_GDRIVE.downloadData(token);
-      if (remoteItems && Array.isArray(remoteItems)) {
-        const localMap = new Map(kaylishItems.map(i => [i.text.toLowerCase(), i]));
-        let newCount = 0;
-        remoteItems.forEach(item => {
-          if (!localMap.has(item.text.toLowerCase())) {
-            kaylishItems.push(item);
-            newCount++;
-          }
-        });
-        
-        const now = new Date().toLocaleString("vi-VN");
-        chrome.storage.sync.set({ kaylishItems, lastSyncTime: now }, () => {
-          chrome.runtime.sendMessage({ action: "UPDATE_BADGE" });
-        });
-        
-        await KAYLISH_GDRIVE.uploadData(token, kaylishItems);
-        alert(`✅ Đồng bộ Google Drive hoàn tất! (Thêm ${newCount} câu từ Drive)`);
-      } else {
-        const now = new Date().toLocaleString("vi-VN");
-        await KAYLISH_GDRIVE.uploadData(token, kaylishItems);
-        chrome.storage.sync.set({ lastSyncTime: now });
-        alert("✅ Đã tải dữ liệu lên Google Drive thành công!");
-      }
+      const activeItems = kaylishItems.filter(i => i.status === "active");
+      const archivedItems = kaylishItems.filter(i => i.status === "archived");
+
+      const result = await KAYLISH_GDRIVE.syncBothFiles(token, activeItems, archivedItems);
+
+      result.active.forEach(i => i.status = "active");
+      result.archived.forEach(i => i.status = "archived");
+
+      const mergedMap = new Map();
+      result.active.forEach(i => mergedMap.set(i.id || i.text, i));
+      result.archived.forEach(i => mergedMap.set(i.id || i.text, i));
+
+      kaylishItems = Array.from(mergedMap.values());
+      const now = new Date().toLocaleString("vi-VN");
+
+      chrome.storage.sync.set({ kaylishItems, lastSyncTime: now }, () => {
+        chrome.runtime.sendMessage({ action: "UPDATE_BADGE" });
+      });
+
+      alert(`✅ Đồng bộ 2 tệp (kaylish_active.json & kaylish_archived.json) thành công!`);
     } catch (err) {
       alert("⚠️ Lỗi đồng bộ: " + err.message);
     }

@@ -1,11 +1,12 @@
 /**
  * Kaylish Google Drive Sync Helper (Google Drive API v3)
- * Stores 'kaylish_data.json' visibly in user's main Google Drive
+ * Stores 'kaylish_active.json' and 'kaylish_archived.json' visibly in user's main Google Drive
  */
 
 const KAYLISH_GDRIVE = {
   SCOPES: 'https://www.googleapis.com/auth/drive.file',
-  FILE_NAME: 'kaylish_data.json',
+  FILE_ACTIVE: 'kaylish_active.json',
+  FILE_ARCHIVED: 'kaylish_archived.json',
   
   // Check if access token is saved and still valid
   getToken() {
@@ -124,10 +125,10 @@ const KAYLISH_GDRIVE = {
     });
   },
 
-  // Search for existing kaylish_data.json in main Drive folder
-  async findFileId(token) {
+  // Search for existing file by name in main Drive folder
+  async findFileId(token, fileName) {
     const res = await fetch(
-      "https://www.googleapis.com/drive/v3/files?q=name='" + this.FILE_NAME + "' and trashed=false",
+      "https://www.googleapis.com/drive/v3/files?q=name='" + fileName + "' and trashed=false",
       {
         headers: { Authorization: "Bearer " + token }
       }
@@ -144,9 +145,9 @@ const KAYLISH_GDRIVE = {
     return null;
   },
 
-  // Download items from Google Drive
-  async downloadData(token) {
-    const fileId = await KAYLISH_GDRIVE.findFileId(token);
+  // Download specific JSON file from Google Drive
+  async downloadData(token, fileName = KAYLISH_GDRIVE.FILE_ACTIVE) {
+    const fileId = await KAYLISH_GDRIVE.findFileId(token, fileName);
     if (!fileId) return null;
 
     const res = await fetch(
@@ -163,13 +164,13 @@ const KAYLISH_GDRIVE = {
     return await res.json();
   },
 
-  // Upload/Save items to Google Drive (create or update visible file)
-  async uploadData(token, kaylishItems) {
-    const fileId = await KAYLISH_GDRIVE.findFileId(token);
-    const content = JSON.stringify(kaylishItems, null, 2);
+  // Upload/Save specific JSON file to Google Drive
+  async uploadData(token, fileName, items) {
+    const fileId = await KAYLISH_GDRIVE.findFileId(token, fileName);
+    const content = JSON.stringify(items, null, 2);
 
     const metadata = {
-      name: KAYLISH_GDRIVE.FILE_NAME,
+      name: fileName,
       mimeType: "application/json"
     };
 
@@ -200,6 +201,34 @@ const KAYLISH_GDRIVE = {
     }
     if (!res.ok) throw new Error("Upload error: " + res.statusText);
     return await res.json();
+  },
+
+  // Helper: Merge 2 arrays of items deduplicating by text
+  mergeItems(localList = [], remoteList = []) {
+    const map = new Map(localList.map(i => [i.text.toLowerCase(), i]));
+    remoteList.forEach(item => {
+      if (item && item.text && !map.has(item.text.toLowerCase())) {
+        map.set(item.text.toLowerCase(), item);
+      }
+    });
+    return Array.from(map.values());
+  },
+
+  // High-level: Sync both active and archived files
+  async syncBothFiles(token, localActiveItems = [], localArchivedItems = []) {
+    const remoteActive = await this.downloadData(token, this.FILE_ACTIVE) || [];
+    const remoteArchived = await this.downloadData(token, this.FILE_ARCHIVED) || [];
+
+    const mergedActive = this.mergeItems(localActiveItems, remoteActive);
+    const mergedArchived = this.mergeItems(localArchivedItems, remoteArchived);
+
+    await this.uploadData(token, this.FILE_ACTIVE, mergedActive);
+    await this.uploadData(token, this.FILE_ARCHIVED, mergedArchived);
+
+    return {
+      active: mergedActive,
+      archived: mergedArchived
+    };
   }
 };
 

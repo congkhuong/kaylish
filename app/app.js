@@ -111,15 +111,21 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem("kaylish_items", JSON.stringify(kaylishItems));
     render();
     
-    // Trigger Google Drive upload if token available
+    // Trigger Google Drive upload for 2 files if token available
     if (gdriveToken) {
-      KAYLISH_GDRIVE.uploadData(gdriveToken, kaylishItems).catch(err => {
-        console.error("GDrive Auto-Upload error:", err);
+      const activeItems = kaylishItems.filter(i => i.status === "active");
+      const archivedItems = kaylishItems.filter(i => i.status === "archived");
+
+      KAYLISH_GDRIVE.uploadData(gdriveToken, KAYLISH_GDRIVE.FILE_ACTIVE, activeItems).catch(err => {
+        console.error("GDrive Active Upload error:", err);
+      });
+      KAYLISH_GDRIVE.uploadData(gdriveToken, KAYLISH_GDRIVE.FILE_ARCHIVED, archivedItems).catch(err => {
+        console.error("GDrive Archived Upload error:", err);
       });
     }
   }
 
-  // Google Drive Sync Engine
+  // Google Drive Sync Engine for 2 separate files
   async function syncWithGoogleDrive() {
     if (!gdriveToken) {
       modalSettings.style.display = "flex";
@@ -130,37 +136,28 @@ document.addEventListener("DOMContentLoaded", () => {
     showBanner("☁️ Đang kết nối Google Drive...");
 
     try {
-      const remoteItems = await KAYLISH_GDRIVE.downloadData(gdriveToken);
-      if (remoteItems && Array.isArray(remoteItems)) {
-        // Merge items deduplicating by text
-        const localMap = new Map(kaylishItems.map(i => [i.text.toLowerCase(), i]));
-        let newCount = 0;
+      const activeItems = kaylishItems.filter(i => i.status === "active");
+      const archivedItems = kaylishItems.filter(i => i.status === "archived");
 
-        remoteItems.forEach(item => {
-          if (!localMap.has(item.text.toLowerCase())) {
-            kaylishItems.push(item);
-            newCount++;
-          }
-        });
+      const result = await KAYLISH_GDRIVE.syncBothFiles(gdriveToken, activeItems, archivedItems);
 
-        localStorage.setItem("kaylish_items", JSON.stringify(kaylishItems));
-        render();
+      result.active.forEach(i => i.status = "active");
+      result.archived.forEach(i => i.status = "archived");
 
-        // Also upload merged set to ensure drive is up-to-date
-        await KAYLISH_GDRIVE.uploadData(gdriveToken, kaylishItems);
-        
-        syncStatusLabel.textContent = "Synced ✅";
-        showBanner(`✅ Đã đồng bộ Google Drive thành công! (${newCount} câu mới)`);
-      } else {
-        // No remote file yet, upload local
-        await KAYLISH_GDRIVE.uploadData(gdriveToken, kaylishItems);
-        syncStatusLabel.textContent = "Synced ✅";
-        showBanner("✅ Đã tải dữ liệu lên Google Drive!");
-      }
+      const mergedMap = new Map();
+      result.active.forEach(i => mergedMap.set(i.id || i.text, i));
+      result.archived.forEach(i => mergedMap.set(i.id || i.text, i));
+
+      kaylishItems = Array.from(mergedMap.values());
+      localStorage.setItem("kaylish_items", JSON.stringify(kaylishItems));
+      render();
+
+      syncStatusLabel.textContent = "Synced ✅";
+      showBanner("✅ Đã đồng bộ 2 tệp (kaylish_active.json & kaylish_archived.json) thành công!");
     } catch (err) {
       console.error("Sync error:", err);
       syncStatusLabel.textContent = "Lỗi Sync";
-      showBanner("⚠️ Lỗi đồng bộ: " + err.message + ". Vui lòng kiểm tra lại Token.");
+      showBanner("⚠️ Lỗi đồng bộ: " + err.message + ". Vui lòng kiểm tra lại Token / Đăng nhập lại.");
     }
   }
 

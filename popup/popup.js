@@ -464,28 +464,27 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    // Perform Drive Sync
+    // Perform Drive Sync for 2 separate files
     syncStatusLabel.textContent = "Đang sync...";
     try {
-      const remoteItems = await KAYLISH_GDRIVE.downloadData(token);
-      if (remoteItems && Array.isArray(remoteItems)) {
-        const localMap = new Map(kaylishItems.map(i => [i.text.toLowerCase(), i]));
-        let newCount = 0;
-        remoteItems.forEach(item => {
-          if (!localMap.has(item.text.toLowerCase())) {
-            kaylishItems.push(item);
-            newCount++;
-          }
-        });
-        saveData();
-        await KAYLISH_GDRIVE.uploadData(token, kaylishItems);
-        syncStatusLabel.textContent = "Synced ✅";
-        alert(`✅ Đã đồng bộ Google Drive thành công! (Thêm ${newCount} câu mới)`);
-      } else {
-        await KAYLISH_GDRIVE.uploadData(token, kaylishItems);
-        syncStatusLabel.textContent = "Synced ✅";
-        alert("✅ Đã đẩy dữ liệu lên Google Drive!");
-      }
+      const activeItems = kaylishItems.filter(i => i.status === "active");
+      const archivedItems = kaylishItems.filter(i => i.status === "archived");
+
+      const result = await KAYLISH_GDRIVE.syncBothFiles(token, activeItems, archivedItems);
+      
+      // Ensure active and archived status are preserved
+      result.active.forEach(i => i.status = "active");
+      result.archived.forEach(i => i.status = "archived");
+
+      const mergedMap = new Map();
+      result.active.forEach(i => mergedMap.set(i.id || i.text, i));
+      result.archived.forEach(i => mergedMap.set(i.id || i.text, i));
+
+      kaylishItems = Array.from(mergedMap.values());
+      saveData();
+
+      syncStatusLabel.textContent = "Synced ✅";
+      alert(`✅ Đã đồng bộ 2 tệp (kaylish_active.json & kaylish_archived.json) lên Google Drive thành công!`);
     } catch (err) {
       console.error("Sync error:", err);
       syncStatusLabel.textContent = "Lỗi Sync";
