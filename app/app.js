@@ -82,22 +82,23 @@ document.addEventListener("DOMContentLoaded", () => {
   // Auto fetch missing IPA for items missing phonetics property
   async function autoFetchMissingIPA() {
     if (typeof KAYLISH_PHONETICS === "undefined") return;
-    let updated = false;
     for (let item of kaylishItems) {
       if (!item.phonetics) {
         try {
           const ipa = await KAYLISH_PHONETICS.fetchSentenceIPA(item.text);
           if (ipa) {
             item.phonetics = ipa;
-            updated = true;
+            saveData();
+            // Update card DOM if rendered
+            const card = document.querySelector(`.item-card[data-id="${item.id}"] .item-phonetics`);
+            if (card) {
+              card.innerHTML = `🔤 ${escapeHtml(ipa)}`;
+            }
           }
         } catch (e) {
           console.error("Auto fetch IPA error:", e);
         }
       }
-    }
-    if (updated) {
-      saveData();
     }
   }
 
@@ -174,6 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
       kaylishItems = Array.from(mergedMap.values());
       localStorage.setItem("kaylish_items", JSON.stringify(kaylishItems));
       render();
+      autoFetchMissingIPA();
 
       syncStatusLabel.textContent = "Synced ✅";
       showBanner("✅ Đã đồng bộ 2 tệp (kaylish_active.json & kaylish_archived.json) thành công!");
@@ -229,7 +231,7 @@ document.addEventListener("DOMContentLoaded", () => {
     card.innerHTML = `
       <div class="item-text-container">
         <p class="item-text ${isBlurred ? 'blurred' : ''}">${escapeHtml(item.text)}</p>
-        ${ipaText ? `<p class="item-phonetics ${isBlurred ? 'blurred' : ''}">🔤 ${escapeHtml(ipaText)}</p>` : ''}
+        <p class="item-phonetics ${isBlurred ? 'blurred' : ''}">${ipaText ? '🔤 ' + escapeHtml(ipaText) : '<span style="opacity:0.6;font-size:11px">⏳ Đang lấy IPA...</span>'}</p>
         ${item.translation ? `<p class="item-translation">${escapeHtml(item.translation)}</p>` : ''}
       </div>
       <div class="item-actions">
