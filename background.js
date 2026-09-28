@@ -1,4 +1,5 @@
 // Kaylish Service Worker (Manifest V3)
+importScripts("phonetics.js");
 
 // Create context menu item on installation
 chrome.runtime.onInstalled.addListener(() => {
@@ -47,13 +48,23 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 // Helper: Save sentence to storage
-function saveSentence(text, sourceUrl = "", sourceTitle = "") {
+async function saveSentence(text, sourceUrl = "", sourceTitle = "") {
+  let phonetics = "";
+  try {
+    if (typeof KAYLISH_PHONETICS !== "undefined") {
+      phonetics = await KAYLISH_PHONETICS.fetchSentenceIPA(text);
+    }
+  } catch (err) {
+    console.error("Error fetching IPA in background:", err);
+  }
+
   return new Promise((resolve) => {
     chrome.storage.sync.get({ kaylishItems: [] }, (data) => {
       const items = data.kaylishItems || [];
       const newItem = {
         id: "kay_" + Date.now() + "_" + Math.random().toString(36).substr(2, 6),
         text: text,
+        phonetics: phonetics,
         translation: "",
         sourceUrl: sourceUrl,
         sourceTitle: sourceTitle,

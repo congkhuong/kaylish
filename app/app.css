@@ -400,6 +400,20 @@ body {
   font-style: italic;
 }
 
+.item-phonetics {
+  font-size: 13px;
+  color: #A5B4FC;
+  margin-top: 4px;
+  font-family: "Segoe UI", "Arial Unicode MS", sans-serif;
+  letter-spacing: 0.3px;
+  transition: filter 0.2s ease;
+}
+
+.item-phonetics.blurred {
+  filter: blur(6px);
+  user-select: none;
+}
+
 .item-actions {
   display: flex;
   align-items: center;

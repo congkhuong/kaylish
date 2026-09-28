@@ -433,6 +433,20 @@ body {
   font-style: italic;
 }
 
+.item-phonetics {
+  font-size: 11px;
+  color: #A5B4FC;
+  margin-top: 3px;
+  font-family: "Segoe UI", "Arial Unicode MS", sans-serif;
+  letter-spacing: 0.3px;
+  transition: var(--transition);
+}
+
+.item-phonetics.blurred {
+  filter: blur(5px);
+  user-select: none;
+}
+
 .item-meta {
   display: flex;
   align-items: center;

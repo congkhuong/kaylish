@@ -145,10 +145,12 @@ document.addEventListener("DOMContentLoaded", () => {
     card.dataset.id = item.id;
 
     const isBlurred = blurMode;
+    const ipaText = item.phonetics || "";
 
     card.innerHTML = `
       <div class="item-text-container" title="${isBlurred ? 'Bấm để toggle ẩn/hiện chữ' : ''}">
         <p class="item-text ${isBlurred ? 'blurred' : ''}">${escapeHtml(item.text)}</p>
+        ${ipaText ? `<p class="item-phonetics ${isBlurred ? 'blurred' : ''}">🔤 ${escapeHtml(ipaText)}</p>` : ''}
         ${item.translation ? `<p class="item-translation">${escapeHtml(item.translation)}</p>` : ''}
       </div>
       <div class="item-meta">
@@ -162,6 +164,9 @@ document.addEventListener("DOMContentLoaded", () => {
           </button>
           <button class="btn-action btn-loop ${loopActiveId === item.id ? 'active' : ''}" data-id="${item.id}" title="Lặp lại 3 lần">
             🔁 Lặp
+          </button>
+          <button class="btn-action btn-ipa" data-id="${item.id}" title="Tải/Lấy lại phiên âm IPA từ AI API">
+            🔤
           </button>
           <button class="btn-action btn-edit" data-id="${item.id}" title="Thêm/Sửa bản dịch">
             ✏️
@@ -180,6 +185,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const textEl = card.querySelector(".item-text");
     card.querySelector(".item-text-container").addEventListener("click", () => {
       textEl.classList.toggle("blurred");
+      const phoneticsEl = card.querySelector(".item-phonetics");
+      if (phoneticsEl) phoneticsEl.classList.toggle("blurred");
     });
 
     // Play Button
@@ -192,6 +199,27 @@ document.addEventListener("DOMContentLoaded", () => {
     card.querySelector(".btn-loop").addEventListener("click", (e) => {
       e.stopPropagation();
       toggleLoop(item.id, item.text);
+    });
+
+    // IPA Refresh Button
+    card.querySelector(".btn-ipa").addEventListener("click", async (e) => {
+      e.stopPropagation();
+      const ipaBtn = card.querySelector(".btn-ipa");
+      ipaBtn.textContent = "⏳";
+      try {
+        const newIpa = await KAYLISH_PHONETICS.fetchSentenceIPA(item.text);
+        if (newIpa) {
+          item.phonetics = newIpa;
+          item.updatedAt = new Date().toISOString();
+          saveData();
+        } else {
+          alert("Không lấy được IPA từ AI API.");
+        }
+      } catch (err) {
+        alert("Lỗi AI API: " + err.message);
+      } finally {
+        ipaBtn.textContent = "🔤";
+      }
     });
 
     // Edit Button
