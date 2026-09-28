@@ -48,23 +48,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 // Helper: Save sentence to storage
-async function saveSentence(text, sourceUrl = "", sourceTitle = "") {
-  let phonetics = "";
-  try {
-    if (typeof KAYLISH_PHONETICS !== "undefined") {
-      phonetics = await KAYLISH_PHONETICS.fetchSentenceIPA(text);
-    }
-  } catch (err) {
-    console.error("Error fetching IPA in background:", err);
-  }
-
+function saveSentence(text, sourceUrl = "", sourceTitle = "") {
   return new Promise((resolve) => {
     chrome.storage.sync.get({ kaylishItems: [] }, (data) => {
       const items = data.kaylishItems || [];
       const newItem = {
         id: "kay_" + Date.now() + "_" + Math.random().toString(36).substr(2, 6),
         text: text,
-        phonetics: phonetics,
+        phonetics: "",
         translation: "",
         sourceUrl: sourceUrl,
         sourceTitle: sourceTitle,
