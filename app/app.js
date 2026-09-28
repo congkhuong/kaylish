@@ -71,10 +71,33 @@ document.addEventListener("DOMContentLoaded", () => {
 
     initVoices();
     render();
+    autoFetchMissingIPA();
 
     // Auto sync with Google Drive if Token exists
     if (gdriveToken) {
       syncWithGoogleDrive();
+    }
+  }
+
+  // Auto fetch missing IPA for items missing phonetics property
+  async function autoFetchMissingIPA() {
+    if (typeof KAYLISH_PHONETICS === "undefined") return;
+    let updated = false;
+    for (let item of kaylishItems) {
+      if (!item.phonetics) {
+        try {
+          const ipa = await KAYLISH_PHONETICS.fetchSentenceIPA(item.text);
+          if (ipa) {
+            item.phonetics = ipa;
+            updated = true;
+          }
+        } catch (e) {
+          console.error("Auto fetch IPA error:", e);
+        }
+      }
+    }
+    if (updated) {
+      saveData();
     }
   }
 

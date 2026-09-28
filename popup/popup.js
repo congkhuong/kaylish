@@ -92,7 +92,28 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       render();
+      autoFetchMissingIPA();
     });
+  }
+
+  // Auto fetch missing IPA for items missing phonetics property
+  async function autoFetchMissingIPA() {
+    if (typeof KAYLISH_PHONETICS === "undefined") return;
+    let updated = false;
+    for (let item of kaylishItems) {
+      if (!item.phonetics) {
+        try {
+          const ipa = await KAYLISH_PHONETICS.fetchSentenceIPA(item.text);
+          if (ipa) {
+            item.phonetics = ipa;
+            updated = true;
+          }
+        } catch (e) {}
+      }
+    }
+    if (updated) {
+      saveData();
+    }
   }
 
   // Save items state to storage and notify background service worker

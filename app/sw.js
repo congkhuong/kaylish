@@ -1,11 +1,12 @@
 // Kaylish PWA Service Worker for Mobile Offline Support
 
-const CACHE_NAME = 'kaylish-pwa-v1';
+const CACHE_NAME = 'kaylish-pwa-v3';
 const ASSETS_TO_CACHE = [
   './index.html',
   './app.css',
   './app.js',
   '../gdrive.js',
+  '../phonetics.js',
   '../icons/icon48.png',
   '../icons/icon128.png'
 ];
